@@ -17,24 +17,30 @@ namespace SignalRAuthTest.Client.Pages
 
         protected override async Task OnInitializedAsync()
         {
-            var tokenResult = await tokenProvider.RequestAccessToken();
-            if (tokenResult.TryGetToken(out var token))
+
+            hubConnection = new HubConnectionBuilder()
+             .WithUrl(NavigationManager.ToAbsoluteUri("/messageshub"), options =>
+             {
+                 options.AccessTokenProvider = async () =>
+                 {
+                     var accessTokenResult = await tokenProvider.RequestAccessToken();
+                     accessTokenResult.TryGetToken(out var accessToken);
+                     return accessToken.Value;
+                 };
+             })
+            .Build();
+
+
+
+            hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
             {
-                hubConnection = new HubConnectionBuilder()
-                .WithUrl(
-                    NavigationManager.ToAbsoluteUri("/messageshub/?access_token={token.Value}")
-                )
-                .Build();
+                var encodedMsg = $"{user}: {message}";
+                messages.Add(encodedMsg);
+                StateHasChanged();
+            });
 
-                hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
-                {
-                    var encodedMsg = $"{user}: {message}";
-                    messages.Add(encodedMsg);
-                    StateHasChanged();
-                });
+            await hubConnection.StartAsync();
 
-                await hubConnection.StartAsync();
-            }
         }
 
         public Task Send() =>

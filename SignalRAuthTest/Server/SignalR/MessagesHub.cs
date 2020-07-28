@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace SignalRAuthTest.Server.SignalR
 {
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize]
     public class MessagesHub : Hub<IMessageClient>
     {
         // https://docs.microsoft.com/en-us/aspnet/core/signalr/hubs?view=aspnetcore-3.1#strongly-typed-hubs
@@ -31,12 +31,12 @@ namespace SignalRAuthTest.Server.SignalR
 
         public async Task SendMessageToCaller(string message)
         {
-            await Clients.Caller.ReceiveMessage(message);
+            await Clients.Caller.ReceiveMessage("", message);
         }
 
         public async Task SendPrivateMessage(string userId, string message)
         {
-            await Clients.User(userId).ReceiveMessage(message);
+            await Clients.User(userId).ReceiveMessage("", message);
         }
 
         public async Task AddToGroup(string groupId)
@@ -53,7 +53,7 @@ namespace SignalRAuthTest.Server.SignalR
 
         public async Task SendMessageToGroup(string groupId, string message)
         {
-            await Clients.Group(groupId).ReceiveMessage(message);
+            await Clients.Group(groupId).ReceiveMessage("", message);
         }
     }
 }

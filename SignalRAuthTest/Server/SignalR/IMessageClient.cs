@@ -8,6 +8,6 @@ namespace SignalRAuthTest.Server.SignalR
     public interface IMessageClient
     {
         Task ReceiveMessage(string user, string message);
-        Task ReceiveMessage(string message);
+        // Task ReceiveMessage(string message);
     }
 }
